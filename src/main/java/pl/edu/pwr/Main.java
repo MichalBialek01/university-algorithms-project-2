@@ -51,6 +51,11 @@ public class Main {
 
                     double averageTime = totalTime / (double) NUM_INSTANCES;
                     System.out.println("Average time: " + averageTime + " ns\n");
+
+                    // Drukowanie grafu
+                    GraphPrinter printer = new GraphPrinter();
+                    org.jgrapht.Graph<Integer, org.jgrapht.graph.DefaultWeightedEdge> jGraphTGraph = printer.createGraph(numVertices, density);
+                    printer.print(jGraphTGraph, 0);
                 }
             }
         }

@@ -1,16 +1,24 @@
 plugins {
+    id 'application'
     id 'java'
 }
-
-group = 'pl.edu.pwr'
-version = '1.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
-    implementation group: 'org.jgrapht', name: 'jgrapht-ext', version: '1.5.1'
+    implementation 'org.jgrapht:jgrapht-core:1.5.1'
+    implementation 'org.jgrapht:jgrapht-ext:1.5.1'
     implementation 'com.github.vlsi.mxgraph:jgraphx:4.0.6'
+}
+
+application {
+    mainClass = 'pl.edu.pwr.Main'
+    applicationDefaultJvmArgs = ["-Xmx4g", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=./"]
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release = 11
 }
