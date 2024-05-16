@@ -10,8 +10,13 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.layout.mxCircleLayout;
 
 import javax.swing.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class GraphPrinter {
 
@@ -29,9 +34,12 @@ public class GraphPrinter {
         // Kolorowanie najkrótszych ścieżek na czerwono
         for (Integer target : graph.vertexSet()) {
             if (target != source) {
-                List<DefaultWeightedEdge> path = paths.getPath(target).getEdgeList();
-                for (DefaultWeightedEdge edge : path) {
-                    graphAdapter.setCellStyle("strokeColor=red", new Object[]{graphAdapter.getEdgeToCellMap().get(edge)});
+                ShortestPathAlgorithm.GraphPath<Integer, DefaultWeightedEdge> path = paths.getPath(target);
+                if (path != null) { // Sprawdzenie, czy ścieżka nie jest null
+                    List<DefaultWeightedEdge> edgeList = path.getEdgeList();
+                    for (DefaultWeightedEdge edge : edgeList) {
+                        graphAdapter.setCellStyle("strokeColor=red", new Object[]{graphAdapter.getEdgeToCellMap().get(edge)});
+                    }
                 }
             }
         }
@@ -43,6 +51,16 @@ public class GraphPrinter {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
+        // Wyświetlanie grafu przez 5 sekund, a następnie zapisanie jako obraz
+        try {
+            TimeUnit.SECONDS.sleep(5);
+            saveComponentAsImage(graphComponent, "graphsVisualization", "graph.png");
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            frame.dispose();
+        }
     }
 
     public Graph<Integer, DefaultWeightedEdge> createGraph(int numVertices, double density) {
@@ -66,5 +84,15 @@ public class GraphPrinter {
         }
 
         return graph;
+    }
+
+    private void saveComponentAsImage(JComponent component, String directoryPath, String fileName) throws IOException {
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        component.print(image.getGraphics());
+        ImageIO.write(image, "PNG", new File(directory, fileName));
     }
 }
