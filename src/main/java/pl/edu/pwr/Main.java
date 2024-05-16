@@ -6,7 +6,7 @@ public class Main {
     private static final int NUM_INSTANCES = 100;
 
     public static void main(String[] args) {
-        int[] vertexCounts = {10,10};
+        int[] vertexCounts = {10};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
 
         for (int numVertices : vertexCounts) {

@@ -34,7 +34,7 @@ public class GraphPrinter {
         // Kolorowanie najkrótszych ścieżek na czerwono
         for (Integer target : graph.vertexSet()) {
             if (target != source) {
-                ShortestPathAlgorithm.GraphPath<Integer, DefaultWeightedEdge> path = paths.getPath(target);
+                var path = paths.getPath(target);
                 if (path != null) { // Sprawdzenie, czy ścieżka nie jest null
                     List<DefaultWeightedEdge> edgeList = path.getEdgeList();
                     for (DefaultWeightedEdge edge : edgeList) {
