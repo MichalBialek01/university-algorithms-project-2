@@ -10,6 +10,7 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.layout.mxCircleLayout;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GraphPrinter {
 
-    public void print(Graph<Integer, DefaultWeightedEdge> graph, int source) {
+    public void print(Graph<Integer, DefaultWeightedEdge> graph, int source, int numVertices, double density) {
         // Obliczanie najkrótszych ścieżek
         DijkstraShortestPath<Integer, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(graph);
         ShortestPathAlgorithm.SingleSourcePaths<Integer, DefaultWeightedEdge> paths = dijkstraAlg.getPaths(source);
@@ -43,12 +44,20 @@ public class GraphPrinter {
                 }
             }
         }
+        for (DefaultWeightedEdge edge : graph.edgeSet()) {
+            double weight = graph.getEdgeWeight(edge);
+            graphAdapter.getModel().setValue(graphAdapter.getEdgeToCellMap().get(edge), String.valueOf(weight));
+        }
 
         // Tworzenie ramki do wyświetlenia grafu
         JFrame frame = new JFrame();
-        frame.getContentPane().add(graphComponent);
-        frame.setTitle("Graf z najkrótszymi ścieżkami od wierzchołka " + source);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(graphComponent);
+        graphComponent.setPreferredSize(new Dimension(frame.getWidth(), frame.getHeight()));
+        frame.setTitle("Graf z najkrótszymi ścieżkami od wierzchołka " + source +
+                " | Wierzchołki: " + numVertices +
+                " | Gęstość: " + (density * 100) + "%");
         frame.pack();
         frame.setVisible(true);
 

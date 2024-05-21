@@ -1,4 +1,4 @@
-package pl.edu.pwr;
+package pl.edu.pwr;+
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ public class Main {
     private static final int NUM_INSTANCES = 100;
 
     public static void main(String[] args) {
-        int[] vertexCounts = {10};
+        int[] vertexCounts = {100};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
 
         for (int numVertices : vertexCounts) {
@@ -55,9 +55,10 @@ public class Main {
                     // Drukowanie grafu
                     GraphPrinter printer = new GraphPrinter();
                     org.jgrapht.Graph<Integer, org.jgrapht.graph.DefaultWeightedEdge> jGraphTGraph = printer.createGraph(numVertices, density);
-                    printer.print(jGraphTGraph, 0);
+                    printer.print(jGraphTGraph, 0, numVertices, density);
                 }
             }
         }
     }
+
 }
