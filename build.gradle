@@ -7,10 +7,13 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
-    implementation 'org.jgrapht:jgrapht-core:1.5.1'
-    implementation 'org.jgrapht:jgrapht-ext:1.5.1'
-    implementation 'com.github.vlsi.mxgraph:jgraphx:4.0.6'
+//    implementation 'org.jgrapht:jgrapht-core:1.5.1'
+//    implementation 'org.jgrapht:jgrapht-ext:1.5.1'
+//    implementation 'com.github.vlsi.mxgraph:jgraphx:4.0.6'
+    implementation 'org.json:json:20171018'
+
 }
 
 application {

@@ -3,8 +3,6 @@ package pl.edu.pwr;
 import java.util.List;
 
 public class Main {
-    private static final int NUM_INSTANCES = 100;
-
     public static void main(String[] args) {
         int[] vertexCounts = {5};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
@@ -19,46 +17,39 @@ public class Main {
                     String representation = useMatrix ? "Matrix" : "List";
                     System.out.println("Representation: " + representation);
 
-                    long totalTime = 0;
-
-                    for (int i = 0; i < NUM_INSTANCES; i++) {
-                        Graph graph;
-                        if (useMatrix) {
-                            graph = new AdjacencyMatrixGraph(numVertices);
-                            int[][] edges = GraphGenerator.generateMatrix(numVertices, density);
-                            for (int u = 0; u < numVertices; u++) {
-                                for (int v = 0; v < numVertices; v++) {
-                                    if (edges[u][v] != Integer.MAX_VALUE) {
-                                        graph.addEdge(u, v, edges[u][v]);
-                                    }
-                                }
-                            }
-                        } else {
-                            graph = new AdjacencyListGraph(numVertices);
-                            List<List<Edge>> edges = GraphGenerator.generateList(numVertices, density);
-                            for (int u = 0; u < numVertices; u++) {
-                                for (Edge edge : edges.get(u)) {
-                                    graph.addEdge(u, edge.node, edge.weight);
+                    Graph graph;
+                    if (useMatrix) {
+                        graph = new AdjacencyMatrixGraph(numVertices);
+                        int[][] edges = GraphGenerator.generateMatrix(numVertices, density);
+                        for (int u = 0; u < numVertices; u++) {
+                            for (int v = 0; v < numVertices; v++) {
+                                if (edges[u][v] != Integer.MAX_VALUE) {
+                                    graph.addEdge(u, v, edges[u][v]);
                                 }
                             }
                         }
-
-                        long startTime = System.nanoTime();
-                        graph.dijkstra(0);
-                        long endTime = System.nanoTime();
-                        totalTime += (endTime - startTime);
+                    } else {
+                        graph = new AdjacencyListGraph(numVertices);
+                        List<List<Edge>> edges = GraphGenerator.generateList(numVertices, density);
+                        for (int u = 0; u < numVertices; u++) {
+                            for (Edge edge : edges.get(u)) {
+                                graph.addEdge(u, edge.getNode(), edge.getWeight());
+                            }
+                        }
                     }
 
-                    double averageTime = totalTime / (double) NUM_INSTANCES;
-                    System.out.println("Average time: " + averageTime + " ns\n");
+                    long startTime = System.nanoTime();
+                    List<Integer> shortestPath = graph.dijkstra(0);
+                    long endTime = System.nanoTime();
+                    long totalTime = endTime - startTime;
 
-                    // Drukowanie grafu
-                    GraphPrinter printer = new GraphPrinter();
-                    org.jgrapht.Graph<Integer, org.jgrapht.graph.DefaultWeightedEdge> jGraphTGraph = printer.createGraph(numVertices, density);
-                    printer.print(jGraphTGraph, 0, numVertices, density);
+                    System.out.println("Time taken: " + totalTime + " ns");
+
+                    // Eksportowanie danych grafu do pliku
+                    String filename = String.format("graphData_%s_%d_%.2f.json", representation, numVertices, density);
+                    GraphPrinter.exportGraphData(graph, shortestPath, filename);
                 }
             }
         }
     }
-
 }

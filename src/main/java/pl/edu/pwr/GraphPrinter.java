@@ -1,107 +1,46 @@
 package pl.edu.pwr;
 
-import org.jgrapht.Graph;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.DirectedWeightedPseudograph;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.layout.mxCircleLayout;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.File;
+import java.io.FileWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class GraphPrinter {
 
-    public void print(Graph<Integer, DefaultWeightedEdge> graph, int source, int numVertices, double density) {
-        // Obliczanie najkrótszych ścieżek
-        DijkstraShortestPath<Integer, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(graph);
-        ShortestPathAlgorithm.SingleSourcePaths<Integer, DefaultWeightedEdge> paths = dijkstraAlg.getPaths(source);
+    public static void exportGraphData(Graph graph, List<Integer> shortestPath, String filename) {
+        JSONObject graphJson = new JSONObject();
 
-        // Wizualizacja grafu
-        JGraphXAdapter<Integer, DefaultWeightedEdge> graphAdapter = new JGraphXAdapter<>(graph);
-        mxGraphComponent graphComponent = new mxGraphComponent(graphAdapter);
-        mxCircleLayout layout = new mxCircleLayout(graphAdapter);
-        layout.execute(graphAdapter.getDefaultParent());
+        JSONArray nodesJson = new JSONArray();
+        for (Node node : graph.getNodes()) {
+            JSONObject nodeJson = new JSONObject();
+            nodeJson.put("id", node.getId());
+            nodesJson.put(nodeJson);
+        }
+        graphJson.put("nodes", nodesJson);
 
-        // Kolorowanie najkrótszych ścieżek na czerwono
-        for (Integer target : graph.vertexSet()) {
-            if (target != source) {
-                var path = paths.getPath(target);
-                if (path != null) { // Sprawdzenie, czy ścieżka nie jest null
-                    List<DefaultWeightedEdge> edgeList = path.getEdgeList();
-                    for (DefaultWeightedEdge edge : edgeList) {
-                        graphAdapter.setCellStyle("strokeColor=red", new Object[]{graphAdapter.getEdgeToCellMap().get(edge)});
-                    }
-                }
+        JSONArray edgesJson = new JSONArray();
+        for (Edge edge : graph.getEdges()) {
+            if (edge instanceof EdgeWithSource) {
+                EdgeWithSource ews = (EdgeWithSource) edge;
+                JSONObject edgeJson = new JSONObject();
+                edgeJson.put("source", ews.getSource());
+                edgeJson.put("target", ews.getNode());
+                edgeJson.put("weight", ews.getWeight());
+                edgesJson.put(edgeJson);
             }
         }
-        for (DefaultWeightedEdge edge : graph.edgeSet()) {
-            double weight = graph.getEdgeWeight(edge);
-            graphAdapter.getModel().setValue(graphAdapter.getEdgeToCellMap().get(edge), String.valueOf(weight));
-        }
+        graphJson.put("edges", edgesJson);
 
-        // Tworzenie ramki do wyświetlenia grafu
-        JFrame frame = new JFrame();
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(graphComponent);
-        graphComponent.setPreferredSize(new Dimension(frame.getWidth(), frame.getHeight()));
-        frame.setTitle("Graf z najkrótszymi ścieżkami od wierzchołka " + source +
-                " | Wierzchołki: " + numVertices +
-                " | Gęstość: " + (density * 100) + "%");
-        frame.pack();
-        frame.setVisible(true);
+        JSONArray pathJson = new JSONArray(shortestPath);
+        graphJson.put("shortestPath", pathJson);
 
-        // Wyświetlanie grafu przez 5 sekund, a następnie zapisanie jako obraz
-        try {
-            TimeUnit.SECONDS.sleep(5);
-            saveComponentAsImage(graphComponent, "/graphsVisualization", "graph.png");
-        } catch (InterruptedException | IOException e) {
+        try (FileWriter file = new FileWriter(filename)) {
+            file.write(graphJson.toString());
+            file.flush();
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            frame.dispose();
         }
-    }
-
-    public Graph<Integer, DefaultWeightedEdge> createGraph(int numVertices, double density) {
-        Graph<Integer, DefaultWeightedEdge> graph = new DirectedWeightedPseudograph<>(DefaultWeightedEdge.class);
-        Random rand = new Random();
-
-        // Dodawanie wierzchołków
-        for (int i = 0; i < numVertices; i++) {
-            graph.addVertex(i);
-        }
-
-        // Dodawanie krawędzi
-        int maxEdges = (int) (numVertices * (numVertices - 1) * density);
-        for (int i = 0; i < maxEdges; i++) {
-            int u = rand.nextInt(numVertices);
-            int v = rand.nextInt(numVertices);
-            if (u != v && !graph.containsEdge(u, v)) {
-                DefaultWeightedEdge e = graph.addEdge(u, v);
-                graph.setEdgeWeight(e, rand.nextInt(10) + 1);
-            }
-        }
-
-        return graph;
-    }
-
-    private void saveComponentAsImage(JComponent component, String directoryPath, String fileName) throws IOException {
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        component.print(image.getGraphics());
-        ImageIO.write(image, "PNG", new File(directory, fileName));
     }
 }
