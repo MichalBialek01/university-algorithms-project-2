@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        int[] vertexCounts = {5};
+        int[] vertexCounts = {100};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
 
         for (int numVertices : vertexCounts) {
