@@ -64,7 +64,7 @@ public class GraphPrinter {
         // Wyświetlanie grafu przez 5 sekund, a następnie zapisanie jako obraz
         try {
             TimeUnit.SECONDS.sleep(5);
-            saveComponentAsImage(graphComponent, "graphsVisualization", "graph.png");
+            saveComponentAsImage(graphComponent, "/graphsVisualization", "graph.png");
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         } finally {
